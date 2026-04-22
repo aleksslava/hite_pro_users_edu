@@ -46,6 +46,8 @@ main_menu_buttons: Column = Column(
                  on_click=contact),
     )
 
+main_menu_window: Window = Window(main_menu_buttons,)
+
 async def welcome_getter(dialog_manager: DialogManager, **kwargs):
     if dialog_manager.start_data is not None:
         start_param = dialog_manager.start_data.get("start_param", 'start')
@@ -198,5 +200,5 @@ electrik_window = Window(
     state=MainDialog.electrik
 )
 
-main_dialog = Dialog(welcome_window, who_are_you, intresting_window, planing_window, repair_compleat_window,
-                     electrik_window)
+main_dialog = Dialog(main_menu_window, welcome_window, who_are_you, intresting_window, planing_window,
+                     repair_compleat_window, electrik_window)
