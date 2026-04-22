@@ -35,7 +35,6 @@ our_contacts = Window(
     Column(
         Url(Const('Написать менеджеру'), url=Format('{url}')),
         Start(Const('Получить расчет'), id='to_podbor', state=Podbor.house_type),
-        Url(Const('Позвонить'), url=Const('tel:74952563300'))
     ),
     state=Contact.our_contact,
     getter=our_contact_getter
