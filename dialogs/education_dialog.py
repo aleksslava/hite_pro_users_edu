@@ -22,7 +22,7 @@ from aiogram.utils.chat_action import ChatActionSender
 from config.config import matching_entry_points, video_for_windows
 from lexicon.lexicon import lexicon_ru
 
-education_lexicon: dict[str, list[str]] = lexicon_ru.get('education')
+education_lexicon: dict[str, list[str]] | dict = lexicon_ru.get('education', {})
 
 logger = logging.getLogger(__name__)
 
@@ -201,7 +201,7 @@ async def lesson_0_getter(dialog_manager: DialogManager, **kwargs):
     }
 
 lesson_0_window_1 = Window(
-    Format("{'main_message'}"),
+    Format("{main_message}"),
     StaticMedia(
         path=Format("{video_path}"),
         type=ContentType.VIDEO,
@@ -211,7 +211,7 @@ lesson_0_window_1 = Window(
 )
 
 lesson_0_window_2 = Window(
-    Format("{'second_message'}"),
+    Format("{second_message}"),
     getter=lesson_0_getter,
     state=Education.lesson_01
 )
