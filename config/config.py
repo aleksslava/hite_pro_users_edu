@@ -49,15 +49,25 @@ video_for_windows = {
     'control_2': VIDEO_DIR / 'start_video.mp4',
     'control_3': VIDEO_DIR / 'start_video.mp4',
     'control_4': VIDEO_DIR / 'start_video.mp4',
+    'lesson_0': VIDEO_DIR / 'start_video.mp4',
+    'lesson_1': VIDEO_DIR / 'start_video.mp4',
+    'lesson_2': VIDEO_DIR / 'start_video.mp4',
+    'lesson_3': VIDEO_DIR / 'start_video.mp4',
+    'lesson_4': VIDEO_DIR / 'start_video.mp4',
+    'lesson_5': VIDEO_DIR / 'start_video.mp4',
+    'lesson_6': VIDEO_DIR / 'start_video.mp4',
+    'lesson_7': VIDEO_DIR / 'start_video.mp4',
+    'lesson_8': VIDEO_DIR / 'start_video.mp4',
+    'lesson_9': VIDEO_DIR / 'start_video.mp4',
 }
 
 pdf_for_windows = {
-    'one_room_before': PDFS_DIR / 'one_room_before.pdf',
-    'one_room_after': PDFS_DIR / 'one_room_after.pdf',
-    'two_room_before': PDFS_DIR / 'two_room_before.pdf',
-    'two_room_after': PDFS_DIR / 'two_room_after.pdf',
-    'house_before': PDFS_DIR / 'house_before.pdf',
-    'house_after': PDFS_DIR / 'house_after.pdf',
+    'one_room_before': PDFS_DIR / 'test.pdf',
+    'one_room_after': PDFS_DIR / 'test.pdf',
+    'two_room_before': PDFS_DIR / 'test.pdf',
+    'two_room_after': PDFS_DIR / 'test.pdf',
+    'house_before': PDFS_DIR / 'test.pdf',
+    'house_after': PDFS_DIR / 'test.pdf',
 }
 
 # Класс с токеном бота телеграмм

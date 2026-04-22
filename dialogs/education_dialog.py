@@ -216,5 +216,234 @@ lesson_0_window_2 = Window(
     state=Education.lesson_01
 )
 
+async def lesson_1_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_1')
+    video_path = video_for_windows.get('lesson_1')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
 
-education_dialog = Dialog(education_menu_window, lesson_0_window_1, lesson_0_window_2)
+lesson_1_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_1_getter,
+    state=Education.lesson_1
+)
+
+lesson_1_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_1_getter,
+    state=Education.lesson_11
+)
+
+async def lesson_2_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_2')
+    video_path = video_for_windows.get('lesson_2')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_2_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_2_getter,
+    state=Education.lesson_2
+)
+
+lesson_2_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_2_getter,
+    state=Education.lesson_21
+)
+
+async def lesson_3_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_3')
+    video_path = video_for_windows.get('lesson_3')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_3_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_3_getter,
+    state=Education.lesson_3
+)
+
+lesson_3_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_3_getter,
+    state=Education.lesson_31
+)
+
+
+async def lesson_4_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_4')
+    video_path = video_for_windows.get('lesson_4')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_4_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_4_getter,
+    state=Education.lesson_4
+)
+
+lesson_4_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_4_getter,
+    state=Education.lesson_41
+)
+
+async def lesson_5_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_5')
+    video_path = video_for_windows.get('lesson_5')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_5_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_5_getter,
+    state=Education.lesson_5
+)
+
+lesson_5_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_5_getter,
+    state=Education.lesson_51
+)
+
+async def lesson_6_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_6')
+    video_path = video_for_windows.get('lesson_6')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_6_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_6_getter,
+    state=Education.lesson_6
+)
+
+lesson_6_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_6_getter,
+    state=Education.lesson_61
+)
+
+async def lesson_7_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_7')
+    video_path = video_for_windows.get('lesson_7')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_7_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_7_getter,
+    state=Education.lesson_7
+)
+
+lesson_7_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_7_getter,
+    state=Education.lesson_71
+)
+
+async def lesson_8_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_8')
+    video_path = video_for_windows.get('lesson_8')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_8_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_8_getter,
+    state=Education.lesson_8
+)
+
+lesson_8_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_8_getter,
+    state=Education.lesson_81
+)
+
+async def lesson_9_getter(dialog_manager: DialogManager, **kwargs):
+    main_message, second_message = education_lexicon.get('lesson_9')
+    video_path = video_for_windows.get('lesson_9')
+    return {
+        'main_message': main_message,
+        'second_message': second_message,
+        'video_path': video_path,
+    }
+
+lesson_9_window_1 = Window(
+    Format("{main_message}"),
+    StaticMedia(
+        path=Format("{video_path}"),
+        type=ContentType.VIDEO,
+    ),
+    getter=lesson_9_getter,
+    state=Education.lesson_9
+)
+
+lesson_9_window_2 = Window(
+    Format("{second_message}"),
+    getter=lesson_9_getter,
+    state=Education.lesson_91
+)
+
+education_dialog = Dialog(education_menu_window, lesson_0_window_1, lesson_0_window_2, lesson_1_window_1, lesson_1_window_2,
+                          lesson_2_window_1, lesson_2_window_2, lesson_3_window_1, lesson_3_window_2,
+                          lesson_4_window_1, lesson_4_window_2, lesson_5_window_1, lesson_5_window_2,
+                          lesson_6_window_1, lesson_6_window_2, lesson_7_window_1, lesson_7_window_2,
+                          lesson_8_window_1, lesson_8_window_2, lesson_9_window_1, lesson_9_window_2)
