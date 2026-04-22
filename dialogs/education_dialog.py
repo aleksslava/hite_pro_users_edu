@@ -173,7 +173,7 @@ async def education_getter(dialog_manager: DialogManager, **kwargs):
 lesson_0_window_1 = Window(
     Format("{'main_message'}"),
     StaticMedia(
-        path="{video_path}",
+        path=Format("{video_path}"),
         type=ContentType.VIDEO,
     ),
     getter=education_getter,

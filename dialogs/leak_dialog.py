@@ -43,7 +43,7 @@ buttons = Column(
 leak_1_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,

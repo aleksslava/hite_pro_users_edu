@@ -95,7 +95,7 @@ buttons = Column(
 climate_1_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -106,7 +106,7 @@ Format("{message}"),
 climate_2_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -117,7 +117,7 @@ Format("{message}"),
 climate_3_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -128,7 +128,7 @@ Format("{message}"),
 climate_4_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -139,7 +139,7 @@ Format("{message}"),
 climate_5_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -150,7 +150,7 @@ Format("{message}"),
 climate_6_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,

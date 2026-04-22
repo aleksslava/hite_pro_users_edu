@@ -65,7 +65,7 @@ async def welcome_getter(dialog_manager: DialogManager, **kwargs):
 welcome_window = Window(
     Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     Next(Const('Вперед'), id='next', show_mode=ShowMode.EDIT),
@@ -126,7 +126,7 @@ async def intresting_getter(dialog_manager: DialogManager, **kwargs):
 intresting_window = Window(
     Format("{message}"),
     StaticMedia(
-                path="{video_path}",
+                path=Format("{video_path}"),
                 type=ContentType.VIDEO,
         ),
     main_menu_buttons,
@@ -148,7 +148,7 @@ async def planing_getter(dialog_manager: DialogManager, **kwargs):
 planing_window = Window(
     Format("{message}"),
     StaticMedia(
-        path="{video_path}",
+        path=Format("{video_path}"),
         type=ContentType.VIDEO,
     ),
     main_menu_buttons,
@@ -169,7 +169,7 @@ async def repair_compleat_getter(dialog_manager: DialogManager, **kwargs):
 repair_compleat_window = Window(
     Format("{message}"),
     StaticMedia(
-        path="{video_path}",
+        path=Format("{video_path}"),
         type=ContentType.VIDEO,
     ),
     main_menu_buttons,
@@ -192,7 +192,7 @@ async def electrik_getter(dialog_manager: DialogManager, **kwargs):
 electrik_window = Window(
     Format("{message}"),
     StaticMedia(
-        path="{video_path}",
+        path=Format("{video_path}"),
         type=ContentType.VIDEO,
     ),
     Url(Const('Стать партнёром HiTE PRO'), url=Format("{partners_bot_edu_tg}"), when='passed'),

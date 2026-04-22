@@ -76,7 +76,7 @@ buttons = Column(
 control_1_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -87,7 +87,7 @@ Format("{message}"),
 control_2_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -98,7 +98,7 @@ Format("{message}"),
 control_3_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -109,7 +109,7 @@ Format("{message}"),
 control_4_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -119,3 +119,4 @@ Format("{message}"),
 
 
 control_dialog = Dialog(control_1_window, control_2_window, control_3_window, control_4_window)
+

@@ -66,7 +66,7 @@ buttons = Column(
 saving_1_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -77,7 +77,7 @@ Format("{message}"),
 saving_2_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
@@ -88,7 +88,7 @@ Format("{message}"),
 saving_3_window = Window(
 Format("{message}"),
     StaticMedia(
-            path="{video_path}",
+            path=Format("{video_path}"),
             type=ContentType.VIDEO,
     ),
     buttons,
