@@ -89,7 +89,7 @@ buttons = Column(
     Back(Const('Назад'), id='back', when='dont_first'),
     Next(Const('Далее'), id='next', when='dont_last'),
     SwitchTo(Const('Хочу также'), id='want_bue', state=Contacting.get_phone),
-    Cancel(Const('Другие темы'), id='to_solutions'),
+    Cancel(Const('Другие темы'), id='to_solutions', show_mode=ShowMode.EDIT),
 )
 
 lighting_1_window = Window(

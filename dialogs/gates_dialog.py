@@ -5,7 +5,7 @@ from aiogram import F
 from aiogram.enums import ContentType, ParseMode
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url
+from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url, Cancel
 from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
@@ -37,7 +37,7 @@ async def gates_1_getter(dialog_manager: DialogManager, **kwargs):
 
 buttons = Column(
     SwitchTo(Const('Хочу также'), id='want_bue', state=Contacting.get_phone),
-    SwitchTo(Const('Другие темы'), id='to_solutions', state=Solutions.menu),
+    Cancel(Const('Другие темы'), id='to_solutions', show_mode=ShowMode.EDIT),
 )
 
 gates_1_window = Window(

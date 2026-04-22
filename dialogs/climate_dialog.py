@@ -157,3 +157,6 @@ Format("{message}"),
     getter=climate_6_getter,
     state=Climate.stage_6
 )
+
+climate_dialog = Dialog(climate_1_window, climate_2_window, climate_3_window, climate_4_window,
+                        climate_5_window, climate_6_window)
