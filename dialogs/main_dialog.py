@@ -10,7 +10,7 @@ from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
 
-from fsm_forms.fsm_models import MainDialog, Solutions, Education, Admin
+from fsm_forms.fsm_models import MainDialog, Solutions, Education, Admin, Examples, Contact
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -30,10 +30,10 @@ async def education(callback: CallbackQuery, button: Button, dialog_manager: Dia
     await dialog_manager.start(Education.education_menu)
 
 async def examples(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    pass
+    await dialog_manager.start(Examples.menu)
 
 async def contact(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    pass
+    await dialog_manager.start(Contact.our_contact)
 
 async def admin(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.start(Admin.menu)

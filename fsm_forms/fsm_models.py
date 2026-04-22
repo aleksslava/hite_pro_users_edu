@@ -88,10 +88,24 @@ class Education(StatesGroup):
     lesson_91 = State()
 
 class Examples(StatesGroup):
-    pass
+    menu = State()
+    one_room_before = State()
+    one_room_after = State()
+    two_room_before = State()
+    two_room_after = State()
+    house_before = State()
+    house_after = State()
+    call_manager = State()
 
 class Contact(StatesGroup):
-    pass
+    our_contact = State()
+
+class Podbor(StatesGroup):
+    house_type = State()
+    repair_stage = State()
+    interes = State()
+    get_phone = State()
+    phone_received = State()
 
 class Contacting(StatesGroup):
     get_phone = State()

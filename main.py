@@ -11,13 +11,16 @@ from config.config import SessionPolicy, load_config
 from db import async_session_factory, init_db, shutdown_db
 from dialogs.admin_dialog import admin_dialog
 from dialogs.climate_dialog import climate_dialog
+from dialogs.contact_dialog import contact_dialog
 from dialogs.control_dialog import control_dialog
 from dialogs.curtains_dialog import curtains_dialog
 from dialogs.education_dialog import education_dialog
+from dialogs.examples_dialog import examples_dialog
 from dialogs.gates_dialog import gates_dialog
 from dialogs.leak_dialog import leak_dialog
 from dialogs.lighting_dialog import lighting_dialog
 from dialogs.main_dialog import main_dialog
+from dialogs.podbor_dialog import podbor_window
 from dialogs.safety_dialog import safety_dialog
 from dialogs.saving_dialog import saving_dialog
 from dialogs.scenarios_dialog import scenarios_dialog
@@ -50,7 +53,7 @@ dp.callback_query.outer_middleware(ClickTrackingMiddleware(config.session_policy
 dp.include_router(main_menu_router)
 dp.include_routers(main_dialog, solution_dialog, lighting_dialog, curtains_dialog, leak_dialog, gates_dialog,
                    safety_dialog, saving_dialog, scenarios_dialog, control_dialog, education_dialog, climate_dialog,
-                   admin_dialog)
+                   admin_dialog, examples_dialog, podbor_window, contact_dialog)
 setup_dialogs(dp)
 
 _sweeper_task: asyncio.Task[None] | None = None

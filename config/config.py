@@ -6,6 +6,7 @@ from environs import Env
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 VIDEO_DIR = BASE_DIR / 'media' / 'video'
+PDFS_DIR = BASE_DIR / 'media' / 'pdfs'
 
 matching_entry_points = {
     'start': VIDEO_DIR / 'start_video.mp4',
@@ -48,6 +49,15 @@ video_for_windows = {
     'control_2': VIDEO_DIR / 'start_video.mp4',
     'control_3': VIDEO_DIR / 'start_video.mp4',
     'control_4': VIDEO_DIR / 'start_video.mp4',
+}
+
+pdf_for_windows = {
+    'one_room_before': PDFS_DIR / 'one_room_before.pdf',
+    'one_room_after': PDFS_DIR / 'one_room_after.pdf',
+    'two_room_before': PDFS_DIR / 'two_room_before.pdf',
+    'two_room_after': PDFS_DIR / 'two_room_after.pdf',
+    'house_before': PDFS_DIR / 'house_before.pdf',
+    'house_after': PDFS_DIR / 'house_after.pdf',
 }
 
 # Класс с токеном бота телеграмм
