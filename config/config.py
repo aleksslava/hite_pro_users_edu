@@ -44,7 +44,10 @@ video_for_windows = {
     'scenarios_4': VIDEO_DIR / 'start_video.mp4',
     'scenarios_5': VIDEO_DIR / 'start_video.mp4',
     'scenarios_6': VIDEO_DIR / 'start_video.mp4',
-
+    'control_1': VIDEO_DIR / 'start_video.mp4',
+    'control_2': VIDEO_DIR / 'start_video.mp4',
+    'control_3': VIDEO_DIR / 'start_video.mp4',
+    'control_4': VIDEO_DIR / 'start_video.mp4',
 }
 
 # Класс с токеном бота телеграмм
