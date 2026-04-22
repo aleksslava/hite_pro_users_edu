@@ -7,6 +7,7 @@ from aiogram.enums import ContentType, ParseMode
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url, Start, Multiselect, RequestContact
+from aiogram_dialog.widgets.markup.reply_keyboard import ReplyKeyboardFactory
 from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
@@ -151,6 +152,7 @@ get_phone_window = Window(
     Format('{message}'),
     RequestContact(Const('Отправить номер телефона')),
     MessageInput(on_contact_received, content_types=ContentType.CONTACT),
+    markup_factory=ReplyKeyboardFactory(resize_keyboard=True, one_time_keyboard=True),
     getter=get_phone_getter,
     state=Podbor.get_phone,
 )
