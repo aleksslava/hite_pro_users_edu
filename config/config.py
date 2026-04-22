@@ -38,6 +38,12 @@ video_for_windows = {
     'saving_1': VIDEO_DIR / 'start_video.mp4',
     'saving_2': VIDEO_DIR / 'start_video.mp4',
     'saving_3': VIDEO_DIR / 'start_video.mp4',
+    'scenarios_1': VIDEO_DIR / 'start_video.mp4',
+    'scenarios_2': VIDEO_DIR / 'start_video.mp4',
+    'scenarios_3': VIDEO_DIR / 'start_video.mp4',
+    'scenarios_4': VIDEO_DIR / 'start_video.mp4',
+    'scenarios_5': VIDEO_DIR / 'start_video.mp4',
+    'scenarios_6': VIDEO_DIR / 'start_video.mp4',
 
 }
 
