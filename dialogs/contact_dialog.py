@@ -31,7 +31,7 @@ async def our_contact_getter(dialog_manager: DialogManager, **kwargs):
             'url': url,}
 
 our_contacts = Window(
-    Format('{message'),
+    Format('{message}'),
     Column(
         Url(Const('Написать менеджеру'), url=Format('{url}')),
         Start(Const('Получить расчет'), id='to_podbor', state=Podbor.house_type),
