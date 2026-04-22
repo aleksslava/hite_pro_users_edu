@@ -95,3 +95,9 @@ class Contact(StatesGroup):
 
 class Contacting(StatesGroup):
     get_phone = State()
+
+class Admin(StatesGroup):
+    menu = State()
+    delete_user_input = State()
+    add_admin_input = State()
+    result = State()

@@ -9,6 +9,7 @@ from aiogram.client.default import DefaultBotProperties
 
 from config.config import SessionPolicy, load_config
 from db import async_session_factory, init_db, shutdown_db
+from dialogs.admin_dialog import admin_dialog
 from dialogs.climate_dialog import climate_dialog
 from dialogs.control_dialog import control_dialog
 from dialogs.curtains_dialog import curtains_dialog
@@ -48,7 +49,8 @@ dp.callback_query.outer_middleware(ClickTrackingMiddleware(config.session_policy
 
 dp.include_router(main_menu_router)
 dp.include_routers(main_dialog, solution_dialog, lighting_dialog, curtains_dialog, leak_dialog, gates_dialog,
-                   safety_dialog, saving_dialog, scenarios_dialog, control_dialog, education_dialog, climate_dialog)
+                   safety_dialog, saving_dialog, scenarios_dialog, control_dialog, education_dialog, climate_dialog,
+                   admin_dialog)
 setup_dialogs(dp)
 
 _sweeper_task: asyncio.Task[None] | None = None

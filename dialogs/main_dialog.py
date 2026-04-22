@@ -10,7 +10,7 @@ from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
 
-from fsm_forms.fsm_models import MainDialog, Solutions
+from fsm_forms.fsm_models import MainDialog, Solutions, Education, Admin
 
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -27,13 +27,16 @@ async def solutions(callback: CallbackQuery, button: Button, dialog_manager: Dia
     await dialog_manager.start(Solutions.menu)
 
 async def education(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    pass
+    await dialog_manager.start(Education.education_menu)
 
 async def examples(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     pass
 
 async def contact(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     pass
+
+async def admin(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+    await dialog_manager.start(Admin.menu)
 
 main_menu_buttons: Column = Column(
     Button(Const('🔍 Решения'), id='solutions',
@@ -44,9 +47,24 @@ main_menu_buttons: Column = Column(
                  on_click=examples),
     Button(Const('💬 Связаться с нами'), id='contact',
                  on_click=contact),
+    Button(Const('Меню администратора'), id='admin',
+                     on_click=admin, when='is_admin'),
     )
 
-main_menu_window: Window = Window(Const('Главное меню:'), main_menu_buttons, state=MainDialog.main_menu)
+async def main_menu_getter(dialog_manager: DialogManager, **kwargs):
+    admin_id = kwargs.get('admin_id')
+    session: AsyncSession = dialog_manager.middleware_data['session']
+    user_id = dialog_manager.event.from_user.id
+
+    is_env_admin = str(user_id) == str(admin_id)
+    db_is_admin = await session.scalar(
+        select(User.is_admin).where(User.tg_user_id == user_id)
+    )
+    is_admin = is_env_admin or bool(db_is_admin)
+    return {'is_admin': is_admin}
+
+main_menu_window: Window = Window(Const('Главное меню:'), main_menu_buttons, state=MainDialog.main_menu,
+                                  getter=main_menu_getter)
 
 async def welcome_getter(dialog_manager: DialogManager, **kwargs):
     if dialog_manager.start_data is not None:

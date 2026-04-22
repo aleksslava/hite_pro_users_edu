@@ -61,7 +61,7 @@ async def control_4_getter(dialog_manager: DialogManager, **kwargs):
         'video_path': video_path,
         'message': message,
         'dont_first': True,
-        'dont_last': True
+        'dont_last': False
     }
 
 
