@@ -12,6 +12,7 @@ matching_entry_points = {
 } # Сопоставление стартового параметра бота и видеоприветствия
 
 video_for_windows = {
+    'start': VIDEO_DIR / 'start_video.mp4',
     'video_1': VIDEO_DIR / 'start_video.mp4',
     'video_2': VIDEO_DIR / 'start_video.mp4',
     'video_3': VIDEO_DIR / 'start_video.mp4',
