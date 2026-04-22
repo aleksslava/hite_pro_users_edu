@@ -46,7 +46,7 @@ main_menu_buttons: Column = Column(
                  on_click=contact),
     )
 
-main_menu_window: Window = Window(main_menu_buttons,)
+main_menu_window: Window = Window(main_menu_buttons, state=MainDialog.main_menu)
 
 async def welcome_getter(dialog_manager: DialogManager, **kwargs):
     if dialog_manager.start_data is not None:
