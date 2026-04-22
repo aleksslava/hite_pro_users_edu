@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from io import BytesIO
 
 from openpyxl import Workbook
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 from openpyxl.chart import BarChart, LineChart, PieChart, Reference
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,16 +29,18 @@ CLICK_COLUMNS = [
 ]
 
 
-def _naive(value):
+def _sanitize(value):
     if isinstance(value, datetime) and value.tzinfo is not None:
         return value.astimezone(timezone.utc).replace(tzinfo=None)
+    if isinstance(value, str):
+        return ILLEGAL_CHARACTERS_RE.sub('', value)
     return value
 
 
 def _write_rows(ws, columns: list[str], rows: list) -> None:
     ws.append(columns)
     for row in rows:
-        ws.append([_naive(getattr(row, col)) for col in columns])
+        ws.append([_sanitize(getattr(row, col)) for col in columns])
 
 
 async def _fill_users(ws, db: AsyncSession) -> None:
@@ -123,7 +126,7 @@ async def _fill_charts(ws, db: AsyncSession) -> None:
     ws.cell(row=src_start_row, column=1, value="Источник")
     ws.cell(row=src_start_row, column=2, value="Пользователей")
     for i, row in enumerate(src_rows, start=src_start_row + 1):
-        ws.cell(row=i, column=1, value=str(row.s))
+        ws.cell(row=i, column=1, value=_sanitize(str(row.s)))
         ws.cell(row=i, column=2, value=int(row.c))
 
     if src_rows:
@@ -140,7 +143,7 @@ async def _fill_charts(ws, db: AsyncSession) -> None:
     ws.cell(row=click_start_row, column=1, value="Окно")
     ws.cell(row=click_start_row, column=2, value="Кликов")
     for i, row in enumerate(click_rows, start=click_start_row + 1):
-        ws.cell(row=i, column=1, value=str(row.w))
+        ws.cell(row=i, column=1, value=_sanitize(str(row.w)))
         ws.cell(row=i, column=2, value=int(row.c))
 
     if click_rows:
