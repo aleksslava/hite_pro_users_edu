@@ -2,12 +2,11 @@ import datetime
 import logging
 
 from aiogram import F, Bot
-from aiogram.enums import ContentType, ParseMode
+from aiogram.enums import ParseMode
 from aiogram.fsm.state import State
-from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove
+from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove, FSInputFile
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url
-from aiogram_dialog.widgets.media import StaticMedia
+from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url, Cancel
 from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
 
@@ -23,6 +22,21 @@ from config.config import matching_entry_points, video_for_windows
 from lexicon.lexicon import lexicon_ru
 
 education_lexicon: dict[str, list[str]] | dict = lexicon_ru.get('education', {})
+
+LESSON_TITLES: dict[str, str] = {
+    'lesson_0': 'Урок 0. Введение. Как устроена электрика в доме',
+    'lesson_1': 'Урок 1. Как работает система HiTE PRO',
+    'lesson_2': 'Урок 2. Чем HiTE PRO может управлять',
+    'lesson_3': 'Урок 3. Как выбрать блок управления',
+    'lesson_4': 'Урок 4. Выключатели, пульты и радиомодуль',
+    'lesson_5': 'Урок 5. Датчики — что автоматизируют',
+    'lesson_6': 'Урок 6. Сервер умного дома — зачем нужен',
+    'lesson_7': 'Урок 7. Приложение — что можно делать',
+    'lesson_8': 'Урок 8. Сценарии и режимы — настраиваем под себя',
+    'lesson_9': 'Урок 9. Собираем всё вместе — типовой проект с нуля',
+}
+
+BACK_TO_MENU_TEXT = 'Вернуться к списку уроков'
 
 logger = logging.getLogger(__name__)
 
@@ -55,11 +69,18 @@ async def education_menu_getter(dialog_manager: DialogManager, **kwargs):
     lesson_variants: dict[str, set[str]] = {}
 
     for lesson_key in lesson_keys:
-        variants = {lesson_key, f"Education:{lesson_key}"}
-        education_state = getattr(Education, lesson_key, None)
-        state_value = getattr(education_state, "state", None)
-        if state_value:
-            variants.add(state_value)
+        followup_key = f"{lesson_key}1"
+        variants = {
+            lesson_key,
+            f"Education:{lesson_key}",
+            followup_key,
+            f"Education:{followup_key}",
+        }
+        for state_key in (lesson_key, followup_key):
+            education_state = getattr(Education, state_key, None)
+            state_value = getattr(education_state, "state", None)
+            if state_value:
+                variants.add(state_value)
         lesson_variants[lesson_key] = variants
 
     lessons = {lesson_key: False for lesson_key in lesson_keys}
@@ -102,45 +123,65 @@ async def education_menu_getter(dialog_manager: DialogManager, **kwargs):
 
     return {"lessons": lessons}
 
+async def _deliver_lesson_video(
+    dialog_manager: DialogManager,
+    lesson_key: str,
+    caption: str | None = None,
+) -> None:
+    bot: Bot = dialog_manager.middleware_data['bot']
+    chat_id = dialog_manager.event.from_user.id
+    video_path = video_for_windows.get(lesson_key)
+    if video_path is None:
+        logger.warning("No video configured for lesson=%s", lesson_key)
+        return
+    async with ChatActionSender.upload_video(bot=bot, chat_id=chat_id):
+        await bot.send_video(
+            chat_id=chat_id,
+            video=FSInputFile(video_path),
+            caption=caption,
+        )
+
+
+async def _start_lesson(
+    dialog_manager: DialogManager,
+    lesson_key: str,
+    followup_state: State,
+) -> None:
+    lesson_texts = education_lexicon.get(lesson_key) or (None, None)
+    main_message = lesson_texts[0] if lesson_texts else None
+    await _deliver_lesson_video(dialog_manager, lesson_key, caption=main_message)
+    await dialog_manager.switch_to(state=followup_state, show_mode=ShowMode.SEND)
+
+
 async def lesson_0_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_0, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_01, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_0', Education.lesson_01)
 
 async def lesson_1_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_1, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_11, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_1', Education.lesson_11)
 
 async def lesson_2_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_2, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_21, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_2', Education.lesson_21)
 
 async def lesson_3_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_3, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_31, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_3', Education.lesson_31)
 
 async def lesson_4_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_4, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_41, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_4', Education.lesson_41)
 
 async def lesson_5_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_5, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_51, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_5', Education.lesson_51)
 
 async def lesson_6_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_6, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_61, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_6', Education.lesson_61)
 
 async def lesson_7_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_7, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_71, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_7', Education.lesson_71)
 
 async def lesson_8_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_8, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_81, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_8', Education.lesson_81)
 
 async def lesson_9_start(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.switch_to(state=Education.lesson_9, show_mode=ShowMode.EDIT)
-    await dialog_manager.switch_to(state=Education.lesson_91, show_mode=ShowMode.SEND)
+    await _start_lesson(dialog_manager, 'lesson_9', Education.lesson_91)
 
 education_menu_window = Window(
     Format(lexicon_ru.get("edu_welcome")),
@@ -185,6 +226,7 @@ Button(Format("Урок 0 Введение Как устроена электр�
                id="9",
                on_click=lesson_9_start,
                ),
+        Cancel(Const("Главное меню"))
     ),
     getter=education_menu_getter,
     state=Education.education_menu
@@ -193,100 +235,68 @@ Button(Format("Урок 0 Введение Как устроена электр�
 
 async def lesson_0_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_0')
-    video_path = video_for_windows.get('lesson_0')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_0_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_0_getter,
-    state=Education.lesson_0
-)
 
 lesson_0_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_1']), id='to_next', on_click=lesson_1_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_0_getter,
     state=Education.lesson_01
 )
 
 async def lesson_1_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_1')
-    video_path = video_for_windows.get('lesson_1')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_1_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_1_getter,
-    state=Education.lesson_1
-)
 
 lesson_1_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_2']), id='to_next', on_click=lesson_2_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_1_getter,
     state=Education.lesson_11
 )
 
 async def lesson_2_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_2')
-    video_path = video_for_windows.get('lesson_2')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_2_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_2_getter,
-    state=Education.lesson_2
-)
 
 lesson_2_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_3']), id='to_next', on_click=lesson_3_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_2_getter,
     state=Education.lesson_21
 )
 
 async def lesson_3_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_3')
-    video_path = video_for_windows.get('lesson_3')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_3_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_3_getter,
-    state=Education.lesson_3
-)
 
 lesson_3_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_4']), id='to_next', on_click=lesson_4_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_3_getter,
     state=Education.lesson_31
 )
@@ -294,156 +304,115 @@ lesson_3_window_2 = Window(
 
 async def lesson_4_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_4')
-    video_path = video_for_windows.get('lesson_4')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_4_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_4_getter,
-    state=Education.lesson_4
-)
 
 lesson_4_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_5']), id='to_next', on_click=lesson_5_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_4_getter,
     state=Education.lesson_41
 )
 
 async def lesson_5_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_5')
-    video_path = video_for_windows.get('lesson_5')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_5_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_5_getter,
-    state=Education.lesson_5
-)
 
 lesson_5_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_6']), id='to_next', on_click=lesson_6_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_5_getter,
     state=Education.lesson_51
 )
 
 async def lesson_6_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_6')
-    video_path = video_for_windows.get('lesson_6')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_6_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_6_getter,
-    state=Education.lesson_6
-)
 
 lesson_6_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_7']), id='to_next', on_click=lesson_7_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_6_getter,
     state=Education.lesson_61
 )
 
 async def lesson_7_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_7')
-    video_path = video_for_windows.get('lesson_7')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_7_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_7_getter,
-    state=Education.lesson_7
-)
 
 lesson_7_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_8']), id='to_next', on_click=lesson_8_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_7_getter,
     state=Education.lesson_71
 )
 
 async def lesson_8_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_8')
-    video_path = video_for_windows.get('lesson_8')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_8_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_8_getter,
-    state=Education.lesson_8
-)
 
 lesson_8_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        Button(Const(LESSON_TITLES['lesson_9']), id='to_next', on_click=lesson_9_start),
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_8_getter,
     state=Education.lesson_81
 )
 
 async def lesson_9_getter(dialog_manager: DialogManager, **kwargs):
     main_message, second_message = education_lexicon.get('lesson_9')
-    video_path = video_for_windows.get('lesson_9')
     return {
         'main_message': main_message,
         'second_message': second_message,
-        'video_path': video_path,
     }
-
-lesson_9_window_1 = Window(
-    Format("{main_message}"),
-    StaticMedia(
-        path=Format("{video_path}"),
-        type=ContentType.VIDEO,
-    ),
-    getter=lesson_9_getter,
-    state=Education.lesson_9
-)
 
 lesson_9_window_2 = Window(
     Format("{second_message}"),
+    Column(
+        SwitchTo(Const(BACK_TO_MENU_TEXT), id='to_menu', state=Education.education_menu),
+    ),
     getter=lesson_9_getter,
     state=Education.lesson_91
 )
 
-education_dialog = Dialog(education_menu_window, lesson_0_window_1, lesson_0_window_2, lesson_1_window_1, lesson_1_window_2,
-                          lesson_2_window_1, lesson_2_window_2, lesson_3_window_1, lesson_3_window_2,
-                          lesson_4_window_1, lesson_4_window_2, lesson_5_window_1, lesson_5_window_2,
-                          lesson_6_window_1, lesson_6_window_2, lesson_7_window_1, lesson_7_window_2,
-                          lesson_8_window_1, lesson_8_window_2, lesson_9_window_1, lesson_9_window_2)
+education_dialog = Dialog(
+    education_menu_window,
+    lesson_0_window_2,
+    lesson_1_window_2,
+    lesson_2_window_2,
+    lesson_3_window_2,
+    lesson_4_window_2,
+    lesson_5_window_2,
+    lesson_6_window_2,
+    lesson_7_window_2,
+    lesson_8_window_2,
+    lesson_9_window_2,
+)
