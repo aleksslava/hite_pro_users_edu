@@ -94,6 +94,7 @@ welcome_window = Window(
 
 async def who_are_you_getter(dialog_manager: DialogManager, **kwargs):
     message = lexicon_ru.get('who_are_you')
+    return {'message': message}
 
 
 async def intresting(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
