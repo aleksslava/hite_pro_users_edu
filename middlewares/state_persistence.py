@@ -9,12 +9,9 @@ from aiogram.types import CallbackQuery, Message
 from aiogram_dialog import StartMode
 from aiogram_dialog.api.exceptions import OutdatedIntent, UnknownIntent
 from aiogram_dialog.api.protocols import BgManagerFactory
-from sqlalchemy import select
 
 from db import async_session_factory
-from db.models import User
 from fsm_forms.fsm_models import MainDialog
-from fsm_forms.state_registry import resolve_state
 from service import ensure_user, update_user_current_state
 
 logger = logging.getLogger(__name__)
@@ -49,14 +46,6 @@ async def _read_current_state(data: dict[str, Any]) -> str | None:
         return await fsm_ctx.get_state()
     except Exception:
         return None
-
-
-async def _load_saved_state(tg_user_id: int) -> str | None:
-    async with async_session_factory() as db:
-        result = await db.execute(
-            select(User.current_state).where(User.tg_user_id == tg_user_id)
-        )
-        return result.scalar_one_or_none()
 
 
 def _extract_chat_context(event: Any) -> tuple[int | None, int | None, str | None]:
@@ -98,6 +87,28 @@ class StatePersistenceMiddleware(BaseMiddleware):
     def set_bg_factory(self, bg_factory: BgManagerFactory) -> None:
         self._bg_factory = bg_factory
 
+    async def _persist_state_for_user(
+        self,
+        *,
+        tg_user_id: int,
+        from_user: Any,
+        state: str,
+    ) -> None:
+        async with async_session_factory() as db:
+            await ensure_user(
+                db,
+                tg_user_id=tg_user_id,
+                username=getattr(from_user, "username", None),
+                first_name=getattr(from_user, "first_name", None),
+                last_name=getattr(from_user, "last_name", None),
+            )
+            await update_user_current_state(
+                db,
+                tg_user_id=tg_user_id,
+                state=state,
+            )
+            await db.commit()
+
     async def _start_state(
         self,
         *,
@@ -132,38 +143,6 @@ class StatePersistenceMiddleware(BaseMiddleware):
         await bg.start(state_obj, mode=StartMode.RESET_STACK)
         return True
 
-    async def _try_restore(
-        self,
-        *,
-        event: Any,
-        data: dict[str, Any],
-        tg_user_id: int,
-        fallback: bool = False,
-    ) -> bool:
-        try:
-            saved = await _load_saved_state(tg_user_id)
-            state_obj = resolve_state(saved)
-            if state_obj is None:
-                if not fallback:
-                    return False
-                state_obj = MainDialog.main_menu
-
-            restored = await self._start_state(
-                event=event,
-                data=data,
-                tg_user_id=tg_user_id,
-                state_obj=state_obj,
-            )
-            if not restored:
-                logger.warning(
-                    "state restore skipped for tg_user_id=%s: no manager context",
-                    tg_user_id,
-                )
-            return restored
-        except Exception:
-            logger.exception("state restore failed for tg_user_id=%s", tg_user_id)
-            return False
-
     async def __call__(
         self,
         handler: Callable[[Any, dict[str, Any]], Awaitable[Any]],
@@ -183,15 +162,29 @@ class StatePersistenceMiddleware(BaseMiddleware):
                 and isinstance(event, CallbackQuery)
             ):
                 logger.info(
-                    "Unknown/Outdated intent for tg_user_id=%s, restoring",
+                    "Unknown/Outdated intent for tg_user_id=%s, starting from main menu",
                     tg_user_id,
                 )
-                await self._try_restore(
+                restarted = await self._start_state(
                     event=event,
                     data=data,
                     tg_user_id=tg_user_id,
-                    fallback=True,
+                    state_obj=MainDialog.main_menu,
                 )
+                if not restarted:
+                    logger.warning(
+                        "failed to restart dialog for tg_user_id=%s: no manager context",
+                        tg_user_id,
+                    )
+                else:
+                    try:
+                        await self._persist_state_for_user(
+                            tg_user_id=tg_user_id,
+                            from_user=from_user,
+                            state=str(MainDialog.main_menu.state),
+                        )
+                    except Exception:
+                        logger.exception("failed to persist /start state")
                 try:
                     await event.answer()
                 except Exception:
@@ -203,20 +196,11 @@ class StatePersistenceMiddleware(BaseMiddleware):
             try:
                 new_state = await _read_current_state(data)
                 if new_state is not None:
-                    async with async_session_factory() as db:
-                        await ensure_user(
-                            db,
-                            tg_user_id=tg_user_id,
-                            username=getattr(from_user, "username", None),
-                            first_name=getattr(from_user, "first_name", None),
-                            last_name=getattr(from_user, "last_name", None),
-                        )
-                        await update_user_current_state(
-                            db,
-                            tg_user_id=tg_user_id,
-                            state=new_state,
-                        )
-                        await db.commit()
+                    await self._persist_state_for_user(
+                        tg_user_id=tg_user_id,
+                        from_user=from_user,
+                        state=new_state,
+                    )
             except Exception:
                 logger.exception("state persist failed")
 
