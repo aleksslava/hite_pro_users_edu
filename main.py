@@ -4,6 +4,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram_dialog import setup_dialogs
+from aiogram_dialog.context.media_storage import MediaIdStorage
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.client.telegram import TelegramAPIServer
@@ -32,6 +33,7 @@ from middlewares.amo_api import AmoApiMiddleware
 from middlewares.db import DbSessionMiddleware
 from middlewares.state_persistence import StatePersistenceMiddleware
 from service import close_stale_sessions
+from service.video_cache import warmup_videos_in_telegram
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +46,7 @@ logger.info("Starting hitepro_users_edu")
 
 config = load_config()
 storage = MemoryStorage()
+media_id_storage = MediaIdStorage()
 
 api = TelegramAPIServer.from_base(
         "http://127.0.0.1:8081",
@@ -64,7 +67,7 @@ dp.include_router(main_menu_router)
 dp.include_routers(main_dialog, solution_dialog, lighting_dialog, curtains_dialog, leak_dialog, gates_dialog,
                    safety_dialog, saving_dialog, scenarios_dialog, control_dialog, education_dialog, climate_dialog,
                    admin_dialog, examples_dialog, podbor_window, contact_dialog)
-bg_factory = setup_dialogs(dp)
+bg_factory = setup_dialogs(dp, media_id_storage=media_id_storage)
 state_restore_middleware.set_bg_factory(bg_factory)
 
 state_persist_middleware = StatePersistenceMiddleware(enable_restore=False, enable_persist=True)
@@ -97,6 +100,18 @@ async def on_startup(bot: Bot, **_: object) -> None:
     except Exception as exc:
         logger.exception("DB init failed: %s", exc)
         return
+
+    try:
+        cache_chat_id = int(config.admin)
+    except (TypeError, ValueError):
+        logger.warning("Video warmup skipped: ADMIN_ID is not a numeric chat id")
+    else:
+        await warmup_videos_in_telegram(
+            bot=bot,
+            media_id_storage=media_id_storage,
+            cache_chat_id=cache_chat_id,
+        )
+
     _sweeper_task = asyncio.create_task(_run_sweeper(config.session_policy))
 
 

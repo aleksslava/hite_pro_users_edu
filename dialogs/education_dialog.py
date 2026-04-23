@@ -19,8 +19,8 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from db.models import Click, Session as SessionModel, User
 from aiogram.utils.chat_action import ChatActionSender
-from config.config import video_for_windows
 from lexicon.lexicon import lexicon_ru
+from service.video_cache import get_cached_video_id, get_configured_video_path
 
 education_lexicon: dict[str, list[str]] | dict = lexicon_ru.get('education', {})
 
@@ -131,14 +131,18 @@ async def _deliver_lesson_video(
 ) -> None:
     bot: Bot = dialog_manager.middleware_data['bot']
     chat_id = dialog_manager.event.from_user.id
-    video_path = video_for_windows.get(lesson_key)
-    if video_path is None:
+    cached_video_id = get_cached_video_id(lesson_key)
+    video_path = get_configured_video_path(lesson_key)
+
+    if cached_video_id is None and video_path is None:
         logger.warning("No video configured for lesson=%s", lesson_key)
         return
+
+    video_source = cached_video_id or FSInputFile(video_path)
     async with ChatActionSender.upload_video(bot=bot, chat_id=chat_id):
         await bot.send_video(
             chat_id=chat_id,
-            video=FSInputFile(video_path),
+            video=video_source,
             caption=caption,
         )
 
