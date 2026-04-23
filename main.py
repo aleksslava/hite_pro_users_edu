@@ -51,14 +51,20 @@ dp.update.middleware(AmoApiMiddleware(admin_id=config.admin, webhook_url=config.
 
 dp.callback_query.outer_middleware(ClickTrackingMiddleware(config.session_policy))
 
-dp.message.outer_middleware(StatePersistenceMiddleware())
-dp.callback_query.outer_middleware(StatePersistenceMiddleware())
+state_restore_middleware = StatePersistenceMiddleware(enable_restore=True, enable_persist=False)
+dp.message.outer_middleware(state_restore_middleware)
+dp.callback_query.outer_middleware(state_restore_middleware)
 
 dp.include_router(main_menu_router)
 dp.include_routers(main_dialog, solution_dialog, lighting_dialog, curtains_dialog, leak_dialog, gates_dialog,
                    safety_dialog, saving_dialog, scenarios_dialog, control_dialog, education_dialog, climate_dialog,
                    admin_dialog, examples_dialog, podbor_window, contact_dialog)
-setup_dialogs(dp)
+bg_factory = setup_dialogs(dp)
+state_restore_middleware.set_bg_factory(bg_factory)
+
+state_persist_middleware = StatePersistenceMiddleware(enable_restore=False, enable_persist=True)
+dp.message.middleware(state_persist_middleware)
+dp.callback_query.middleware(state_persist_middleware)
 
 _sweeper_task: asyncio.Task[None] | None = None
 
