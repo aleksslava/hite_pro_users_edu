@@ -4,6 +4,7 @@ import logging
 from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery
 
 from config.config import SessionPolicy
@@ -13,17 +14,27 @@ from service import ensure_user, record_click
 logger = logging.getLogger(__name__)
 
 
-def _extract_dialog_window(data: dict[str, Any]) -> str | None:
+async def _extract_dialog_window(data: dict[str, Any]) -> str | None:
     dm = data.get("dialog_manager")
-    if dm is None:
+    if dm is not None:
+        try:
+            state = dm.current_context().state
+        except Exception:
+            state = None
+        if state is not None:
+            return str(getattr(state, "state", state))
+
+    raw_state = data.get("raw_state")
+    if isinstance(raw_state, str):
+        return raw_state
+
+    fsm_ctx: FSMContext | None = data.get("state")
+    if fsm_ctx is None:
         return None
     try:
-        state = dm.current_context().state
+        return await fsm_ctx.get_state()
     except Exception:
         return None
-    if state is None:
-        return None
-    return str(getattr(state, "state", state))
 
 
 class ClickTrackingMiddleware(BaseMiddleware):
@@ -39,7 +50,7 @@ class ClickTrackingMiddleware(BaseMiddleware):
         data["session_policy"] = self._policy
         result = await handler(event, data)
         if event.from_user is not None:
-            dialog_window = _extract_dialog_window(data)
+            dialog_window = await _extract_dialog_window(data)
             dialog_button = event.data
             try:
                 async with async_session_factory() as db:
