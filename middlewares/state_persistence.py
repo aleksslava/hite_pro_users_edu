@@ -173,28 +173,15 @@ class StatePersistenceMiddleware(BaseMiddleware):
         from_user = getattr(event, "from_user", None)
         tg_user_id = getattr(from_user, "id", None)
 
-        if self._enable_restore and tg_user_id is not None:
-            needs_restore = isinstance(event, CallbackQuery)
-            if isinstance(event, Message):
-                text = (event.text or "").strip()
-                needs_restore = not text.startswith("/")
-            if needs_restore:
-                try:
-                    current_state = await _read_current_state(data)
-                    if current_state is None:
-                        await self._try_restore(
-                            event=event,
-                            data=data,
-                            tg_user_id=tg_user_id,
-                        )
-                except Exception:
-                    logger.exception("proactive restore check failed")
-
         result = None
         try:
             result = await handler(event, data)
         except (UnknownIntent, OutdatedIntent):
-            if self._enable_restore and tg_user_id is not None:
+            if (
+                self._enable_restore
+                and tg_user_id is not None
+                and isinstance(event, CallbackQuery)
+            ):
                 logger.info(
                     "Unknown/Outdated intent for tg_user_id=%s, restoring",
                     tg_user_id,
@@ -205,11 +192,10 @@ class StatePersistenceMiddleware(BaseMiddleware):
                     tg_user_id=tg_user_id,
                     fallback=True,
                 )
-                if isinstance(event, CallbackQuery):
-                    try:
-                        await event.answer()
-                    except Exception:
-                        logger.exception("failed to answer outdated callback")
+                try:
+                    await event.answer()
+                except Exception:
+                    logger.exception("failed to answer outdated callback")
             else:
                 raise
 
