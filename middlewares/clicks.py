@@ -36,6 +36,8 @@ class ClickTrackingMiddleware(BaseMiddleware):
         event: CallbackQuery,
         data: dict[str, Any],
     ) -> Any:
+        data["session_policy"] = self._policy
+        result = await handler(event, data)
         if event.from_user is not None:
             dialog_window = _extract_dialog_window(data)
             dialog_button = event.data
@@ -59,4 +61,4 @@ class ClickTrackingMiddleware(BaseMiddleware):
             except Exception:
                 logger.exception("failed to record click")
 
-        return await handler(event, data)
+        return result

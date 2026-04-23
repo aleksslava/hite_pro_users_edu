@@ -8,6 +8,7 @@ from service.service import (
     get_core_kpi,
     get_top_dialog_windows,
     record_click,
+    update_user_current_state,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "get_core_kpi",
     "get_top_dialog_windows",
     "record_click",
+    "update_user_current_state",
 ]

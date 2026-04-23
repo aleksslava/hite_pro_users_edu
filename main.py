@@ -29,6 +29,7 @@ from handlers.start_handler import main_menu_router
 from middlewares.amo_api import AmoApiMiddleware
 from middlewares.clicks import ClickTrackingMiddleware
 from middlewares.db import DbSessionMiddleware
+from middlewares.state_persistence import StatePersistenceMiddleware
 from service import close_stale_sessions
 
 logger = logging.getLogger(__name__)
@@ -49,6 +50,9 @@ dp.update.middleware(DbSessionMiddleware())
 dp.update.middleware(AmoApiMiddleware(admin_id=config.admin, webhook_url=config.webhook_url, utm_token=config.utm_token))
 
 dp.callback_query.outer_middleware(ClickTrackingMiddleware(config.session_policy))
+
+dp.message.outer_middleware(StatePersistenceMiddleware())
+dp.callback_query.outer_middleware(StatePersistenceMiddleware())
 
 dp.include_router(main_menu_router)
 dp.include_routers(main_dialog, solution_dialog, lighting_dialog, curtains_dialog, leak_dialog, gates_dialog,

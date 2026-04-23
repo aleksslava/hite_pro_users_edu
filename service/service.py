@@ -50,6 +50,19 @@ async def ensure_user(
     return user.id
 
 
+async def update_user_current_state(
+    db: AsyncSession,
+    *,
+    tg_user_id: int,
+    state: str | None,
+) -> None:
+    await db.execute(
+        update(User)
+        .where(User.tg_user_id == tg_user_id)
+        .values(current_state=state)
+    )
+
+
 async def _acquire_user_lock(db: AsyncSession, user_id: int) -> None:
     await db.execute(
         text("SELECT pg_advisory_xact_lock(:key)").bindparams(key=user_id)
