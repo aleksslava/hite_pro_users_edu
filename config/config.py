@@ -10,6 +10,7 @@ PDFS_DIR = BASE_DIR / 'media' / 'pdfs'
 
 matching_entry_points = {
     'start': VIDEO_DIR / 'start_video.mp4',
+    'reels': VIDEO_DIR / 'start_video.mp4',
 } # Сопоставление стартового параметра бота и видеоприветствия
 
 video_for_windows = {
