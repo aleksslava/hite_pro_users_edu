@@ -2,7 +2,8 @@ import logging
 from datetime import datetime, timezone
 
 from aiogram.types import BufferedInputFile, CallbackQuery, Message
-from aiogram_dialog import Dialog, DialogManager, Window
+from aiogram_dialog import Dialog, DialogManager
+from dialogs.tracked_window import Window
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Cancel, Column, SwitchTo
 from aiogram_dialog.widgets.text import Const, Format
@@ -80,6 +81,18 @@ async def result_getter(dialog_manager: DialogManager, **kwargs):
     return {'result_message': dialog_manager.dialog_data.get('result_message', '')}
 
 
+async def admin_menu_getter(dialog_manager: DialogManager, **kwargs):
+    return {}
+
+
+async def delete_user_getter(dialog_manager: DialogManager, **kwargs):
+    return {}
+
+
+async def add_admin_getter(dialog_manager: DialogManager, **kwargs):
+    return {}
+
+
 admin_menu_window = Window(
     Const('Меню администратора'),
     Column(
@@ -88,6 +101,7 @@ admin_menu_window = Window(
         SwitchTo(Const('➕ Добавить администратора'), id='to_add_admin', state=Admin.add_admin_input),
         Cancel(Const('◀ Назад в главное меню'), id='to_main'),
     ),
+    getter=admin_menu_getter,
     state=Admin.menu,
 )
 
@@ -95,6 +109,7 @@ delete_user_window = Window(
     Const('Введите telegram_id пользователя для удаления:'),
     MessageInput(on_delete_user_input),
     SwitchTo(Const('◀ Назад'), id='back_to_menu', state=Admin.menu),
+    getter=delete_user_getter,
     state=Admin.delete_user_input,
 )
 
@@ -102,6 +117,7 @@ add_admin_window = Window(
     Const('Введите telegram_id пользователя, которому выдать права администратора:'),
     MessageInput(on_add_admin_input),
     SwitchTo(Const('◀ Назад'), id='back_to_menu', state=Admin.menu),
+    getter=add_admin_getter,
     state=Admin.add_admin_input,
 )
 

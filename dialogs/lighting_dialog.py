@@ -8,7 +8,8 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url, Cancel, Start
 from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
-from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
+from aiogram_dialog import Dialog, DialogManager, StartMode, ShowMode
+from dialogs.tracked_window import Window
 
 from fsm_forms.fsm_models import MainDialog, Lighting, Curtains, Climate, Leak, Gates, Safety, Saving, Scenarios, \
     Control, Solutions, Contacting, Podbor

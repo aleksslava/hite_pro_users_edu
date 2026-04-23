@@ -8,7 +8,8 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url
 from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
-from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
+from aiogram_dialog import Dialog, DialogManager, StartMode, ShowMode
+from dialogs.tracked_window import Window
 
 from fsm_forms.fsm_models import MainDialog, Lighting, Curtains, Climate, Leak, Gates, Safety, Saving, Scenarios, \
     Control, Solutions
@@ -51,6 +52,11 @@ async def scenarios(callback: CallbackQuery, button: Button, dialog_manager: Dia
 async def control(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     await dialog_manager.start(Control.stage_1)
 
+
+async def solutions_getter(dialog_manager: DialogManager, **kwargs):
+    return {}
+
+
 solutions_menu_buttons: Column = Column(
     Button(Const('💡Освещение'), id='lighting',
                  on_click=lighting),
@@ -75,6 +81,7 @@ solutions_menu_buttons: Column = Column(
 solutions_window = Window(
     Format(lexicon_ru.get('solutions')),
     solutions_menu_buttons,
+    getter=solutions_getter,
     state=Solutions.menu,
 )
 

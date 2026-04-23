@@ -29,7 +29,6 @@ from dialogs.scenarios_dialog import scenarios_dialog
 from dialogs.solutions_dialog import solution_dialog
 from handlers.start_handler import main_menu_router
 from middlewares.amo_api import AmoApiMiddleware
-from middlewares.clicks import ClickTrackingMiddleware
 from middlewares.db import DbSessionMiddleware
 from middlewares.state_persistence import StatePersistenceMiddleware
 from service import close_stale_sessions
@@ -56,8 +55,6 @@ bot = Bot(token=config.tg_bot.token, session=session, default=DefaultBotProperti
 dp = Dispatcher(storage=storage)
 dp.update.middleware(DbSessionMiddleware())
 dp.update.middleware(AmoApiMiddleware(admin_id=config.admin, webhook_url=config.webhook_url, utm_token=config.utm_token))
-
-dp.callback_query.outer_middleware(ClickTrackingMiddleware(config.session_policy))
 
 state_restore_middleware = StatePersistenceMiddleware(enable_restore=True, enable_persist=False)
 dp.message.outer_middleware(state_restore_middleware)

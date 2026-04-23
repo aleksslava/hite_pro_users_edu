@@ -8,7 +8,8 @@ from aiogram.types import CallbackQuery, Message, ReplyKeyboardRemove, FSInputFi
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Column, Back, SwitchTo, Next, Url, Cancel
 from aiogram_dialog.widgets.text import Const, Format
-from aiogram_dialog import Dialog, Window, DialogManager, StartMode, ShowMode
+from aiogram_dialog import Dialog, DialogManager, StartMode, ShowMode
+from dialogs.tracked_window import Window
 
 from fsm_forms.fsm_models import Education, MainDialog
 
@@ -17,10 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from db.models import Click, Session as SessionModel, User
-from db import async_session_factory
-from service import ensure_user, record_click
 from aiogram.utils.chat_action import ChatActionSender
-from config.config import matching_entry_points, video_for_windows
+from config.config import video_for_windows
 from lexicon.lexicon import lexicon_ru
 
 education_lexicon: dict[str, list[str]] | dict = lexicon_ru.get('education', {})
@@ -144,32 +143,6 @@ async def _deliver_lesson_video(
         )
 
 
-async def _record_lesson_view(dialog_manager: DialogManager, lesson_key: str) -> None:
-    user = getattr(dialog_manager.event, "from_user", None)
-    policy = dialog_manager.middleware_data.get("session_policy")
-    if user is None or policy is None:
-        return
-    try:
-        async with async_session_factory() as db:
-            user_id = await ensure_user(
-                db,
-                tg_user_id=user.id,
-                username=user.username,
-                first_name=user.first_name,
-                last_name=user.last_name,
-            )
-            await record_click(
-                db,
-                user_id=user_id,
-                policy=policy,
-                dialog_window=f"Education:{lesson_key}",
-                dialog_button=None,
-            )
-            await db.commit()
-    except Exception:
-        logger.exception("failed to record lesson view click for %s", lesson_key)
-
-
 async def _start_lesson(
     dialog_manager: DialogManager,
     lesson_key: str,
@@ -178,7 +151,6 @@ async def _start_lesson(
     lesson_texts = education_lexicon.get(lesson_key) or (None, None)
     main_message = lesson_texts[0] if lesson_texts else None
     await _deliver_lesson_video(dialog_manager, lesson_key, caption=main_message)
-    await _record_lesson_view(dialog_manager, lesson_key)
     await dialog_manager.switch_to(state=followup_state, show_mode=ShowMode.SEND)
 
 
