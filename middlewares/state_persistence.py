@@ -4,7 +4,10 @@ import logging
 from typing import Any, Awaitable, Callable
 
 from aiogram import BaseMiddleware
+from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 from aiogram_dialog import StartMode
+from aiogram_dialog.api.exceptions import UnknownIntent
 from sqlalchemy import select
 
 from db import async_session_factory
@@ -36,6 +39,16 @@ async def _load_saved_state(tg_user_id: int) -> str | None:
         return result.scalar_one_or_none()
 
 
+async def _try_restore(dm: Any, tg_user_id: int) -> None:
+    try:
+        saved = await _load_saved_state(tg_user_id)
+        state_obj = resolve_state(saved)
+        if state_obj is not None:
+            await dm.start(state_obj, mode=StartMode.RESET_STACK)
+    except Exception:
+        logger.exception("state restore failed for tg_user_id=%s", tg_user_id)
+
+
 class StatePersistenceMiddleware(BaseMiddleware):
     async def __call__(
         self,
@@ -45,32 +58,34 @@ class StatePersistenceMiddleware(BaseMiddleware):
     ) -> Any:
         dm = data.get("dialog_manager")
         from_user = getattr(event, "from_user", None)
+        tg_user_id = getattr(from_user, "id", None)
 
-        if dm is not None and from_user is not None:
+        if isinstance(event, Message) and dm is not None and tg_user_id is not None:
             try:
-                has_context = False
-                try:
-                    has_context = dm.current_context() is not None
-                except Exception:
-                    has_context = False
-                if not has_context:
-                    saved = await _load_saved_state(from_user.id)
-                    state_obj = resolve_state(saved)
-                    if state_obj is not None:
-                        await dm.start(state_obj, mode=StartMode.RESET_STACK)
+                fsm_ctx: FSMContext | None = data.get("state")
+                current_fsm = await fsm_ctx.get_state() if fsm_ctx is not None else None
+                if current_fsm is None:
+                    await _try_restore(dm, tg_user_id)
             except Exception:
-                logger.exception("state restore failed")
+                logger.exception("proactive restore check failed")
 
-        result = await handler(event, data)
+        result = None
+        try:
+            result = await handler(event, data)
+        except UnknownIntent:
+            logger.info("UnknownIntent for tg_user_id=%s — restoring saved state", tg_user_id)
+            if dm is not None and tg_user_id is not None:
+                await _try_restore(dm, tg_user_id)
 
-        if from_user is not None:
+        if tg_user_id is not None:
             try:
                 new_state = _extract_dialog_window(data)
-                async with async_session_factory() as db:
-                    await update_user_current_state(
-                        db, tg_user_id=from_user.id, state=new_state
-                    )
-                    await db.commit()
+                if new_state is not None:
+                    async with async_session_factory() as db:
+                        await update_user_current_state(
+                            db, tg_user_id=tg_user_id, state=new_state
+                        )
+                        await db.commit()
             except Exception:
                 logger.exception("state persist failed")
 
