@@ -6,6 +6,8 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram_dialog import setup_dialogs
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.default import DefaultBotProperties
+from aiogram.client.telegram import TelegramAPIServer
+from aiogram.client.session.aiohttp import AiohttpSession
 
 from config.config import SessionPolicy, load_config
 from db import async_session_factory, init_db, shutdown_db
@@ -44,7 +46,13 @@ logger.info("Starting hitepro_users_edu")
 config = load_config()
 storage = MemoryStorage()
 
-bot = Bot(token=config.tg_bot.token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+api = TelegramAPIServer.from_base(
+        "http://127.0.0.1:8081",
+        is_local=True,  # поставьте True, если ваш telegram-bot-api запущен с --local
+    )
+session = AiohttpSession(api=api)
+
+bot = Bot(token=config.tg_bot.token, session=session, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=storage)
 dp.update.middleware(DbSessionMiddleware())
 dp.update.middleware(AmoApiMiddleware(admin_id=config.admin, webhook_url=config.webhook_url, utm_token=config.utm_token))
